@@ -1,0 +1,29 @@
+<p id="notice"><%= notice %></p>
+
+<p>
+  <strong>Name:</strong>
+  <%= @rapper.name %>
+</p>
+
+<p>
+  <strong>Year:</strong>
+  <%= @rapper.year %>
+</p>
+
+<p>
+  <strong>Influenced:</strong>
+  <%= @rapper.influenced %>
+</p>
+
+<p>
+  <strong>Beef:</strong>
+  <%= @rapper.beef %>
+</p>
+
+<p>
+  <strong>Collaborated:</strong>
+  <%= @rapper.collaborated %>
+</p>
+
+<%= link_to 'Edit', edit_rapper_path(@rapper) %> |
+<%= link_to 'Back', rappers_path %>

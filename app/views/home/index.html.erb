@@ -1,2 +1,65 @@
+<script>
+function getElementsFromString(list, delim){
+  return list.split(delim);
+}
+
+function Rapper(name, year){
+  this.mName = name;
+  this.mYear = year;
+  this.mBeef = [];
+  this.mInfluenced = [];
+  this.mCollaborated = [];
+}
+
+Rapper.prototype = {
+  setBeef: function(beefWith){
+    this.mBeef.push(beefWith);
+  },
+  
+  setInfluenced: function(influenced){
+    this.mInfluenced.push(influenced);
+  },
+
+  setCollaborated: function(collaborater){
+    this.mCollaborated.push(collaborater);
+  },
+};
+
+var rapperArray = [];
+
+<% @rappers.each do |rapper| %>
+  var r = JSON.parse('<%= j(rapper.to_json).html_safe %>');
+  var rapper = new Rapper(r.name, r.year);
+  
+  if(r.beef){
+    var beefList = getElementsFromString(r.beef, ',');
+    for(var b in beefList){
+      rapper.setBeef(beefList[b]);
+    }
+  }
+
+  if(r.influenced){
+    var influenceList = getElementsFromString(r.influenced, ',');
+    for(var i in influenceList){
+      rapper.setInfluenced(influenceList[i]);
+    }
+  }
+
+  if(r.collaborated){
+    var collabList = getElementsFromString(r.collaborated, ',');
+    for(var c in collabList){
+      rapper.setCollaborated(collabList[c]);
+    }
+  }
+
+  rapperArray.push(rapper);
+<% end %>
+
+</script>
+
 <h1>Home#index</h1>
 <p>Rappers and stuff.</p>
+
+<% @rappers.each do |rapper| %>
+  <%= rapper.name %><br/>
+<% end %>

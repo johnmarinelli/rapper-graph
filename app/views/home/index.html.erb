@@ -9,6 +9,18 @@
   margin: 1px;
   color: white;
 }
+
+.axis path,
+.axis line{
+  fill: none;
+  stroke: black;
+  shape-rendering: crispEdges;
+}
+
+.axis text{
+  font-family: sans-serif;
+  font-size: 11px;
+}
 </style>
 
 </head>
@@ -33,6 +45,8 @@ function Rapper(name, year){
   this.mBeef = [];
   this.mInfluenced = [];
   this.mCollaborated = [];
+  
+  this.mPresence = 0;
 }
 
 Rapper.prototype = {
@@ -46,6 +60,10 @@ Rapper.prototype = {
 
   setCollaborated: function(collaborater){
     this.mCollaborated.push(collaborater);
+  },
+
+  setPresence: function(){
+    this.mPresence = this.mBeef.length + this.mInfluenced.length + this.mCollaborated.length;
   },
 };
 
@@ -76,6 +94,8 @@ var rapperArray = [];
     }
   }
 
+  rapper.setPresence();
+
   rapperArray.push(rapper);
 <% end %>
 </script>
@@ -84,13 +104,9 @@ var rapperArray = [];
 <script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
 
 <script>
-var data = [];
+var maxAvatarRadius =  25;
 var width = 500;
-var height = 50;
-
-for(var i in rapperArray){
-  data.push(rapperArray[i].mYear);
-}
+var height = 500;
 
 var svg = d3.select("body")
 			.append("svg")
@@ -98,26 +114,47 @@ var svg = d3.select("body")
 			.attr("height", height + "px");
 
 var circles = svg.selectAll("circle")
-   .data(data)
-   .enter()
-   .append("circle");
+			     .data(rapperArray)
+			     .enter()
+   			     .append("circle");
+  
+var xDomain = getExtremes(rapperArray, 'mYear');
+var xScale = d3.scale.linear()
+					 .domain([xDomain[0], xDomain[1]])
+					 .range([maxAvatarRadius, width - maxAvatarRadius]);var xAxis = d3.svg.axis()
+				  .scale(xScale)
+				  .orient("bottom")
+				  .ticks(5);
+svg.append("g")
+   .attr("class", "axis")
+   .attr("transform", "translate(0," + (height - maxAvatarRadius) + ")")
+   .call(xAxis);
 
-//'i' is the index
+var yDomain = getExtremes(rapperArray, 'mPresence');
+var yScale = d3.scale.linear()
+					 .domain([yDomain[0], yDomain[1]])
+					 .range([maxAvatarRadius, height - maxAvatarRadius]);
+
+var rDomain = getExtremes(rapperArray, 'mPresence');
+var rScale = d3.scale.linear()
+					 .domain([rDomain[0], rDomain[1]])
+					 .range([maxAvatarRadius * .25, maxAvatarRadius]);
+
+//'d' is the actual data, 'i' is the index
+//cx: function of year
+//cy: random; make sure it doesn't overlap w/ other nodes
+//    or, could be a function of presence score like 'r'
+//	  lower on graph means lower presence
+//r:  function of presence score that's calculated using influenced, beef, and collaborated attributes
 circles.attr("cx", function(d, i){
-			  return (i * 50) + 25 + "px";
+			  return xScale(d.mYear);
 			})
-	   .attr("cy", height/2 + "px")
+	   .attr("cy", function(d, i){
+	   		  return yScale(d.mPresence);
+			})
 	   .attr("r", function(d, i){
-	   		  return i * 5 + 5 + "px";
-			});
+	   		  return rScale(d.mPresence);
+	   		}); 
 
-
-d3.select(".chart")
-  .selectAll("div")
-    .data(rapperArray)
-  .enter().append("div")
-    .style("width", function(d){ return d.mYear / 100 + "px"; })
-	.style("background-color", function(d){ if(d.mYear > 2000){ return "red"; } else return "steelblue"; })
-	.text(function(d){ return d.mYear; });
 </script>
 </body>

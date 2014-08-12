@@ -1,3 +1,27 @@
+<head>
+
+<style>
+.chart div{
+  font: 10px sans-serif;
+  background-color: steelblue;
+  text-align: right;
+  padding: 3px;
+  margin: 1px;
+  color: white;
+}
+</style>
+
+</head>
+<body>
+  <h1>Home#index</h1>
+  <p>Rappers and stuff.</p>
+
+  <% @rappers.each do |rapper| %>
+    <%= rapper.name %><br/>
+  <% end %>
+
+  <div class="chart">
+  </div>
 <script>
 function getElementsFromString(list, delim){
   return list.split(delim);
@@ -54,12 +78,46 @@ var rapperArray = [];
 
   rapperArray.push(rapper);
 <% end %>
-
 </script>
 
-<h1>Home#index</h1>
-<p>Rappers and stuff.</p>
+<script src="http://code.jquery.com/jquery-2.1.1.min.js"></script>
+<script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
 
-<% @rappers.each do |rapper| %>
-  <%= rapper.name %><br/>
-<% end %>
+<script>
+var data = [];
+var width = 500;
+var height = 50;
+
+for(var i in rapperArray){
+  data.push(rapperArray[i].mYear);
+}
+
+var svg = d3.select("body")
+			.append("svg")
+			.attr("width", width + "px")
+			.attr("height", height + "px");
+
+var circles = svg.selectAll("circle")
+   .data(data)
+   .enter()
+   .append("circle");
+
+//'i' is the index
+circles.attr("cx", function(d, i){
+			  return (i * 50) + 25 + "px";
+			})
+	   .attr("cy", height/2 + "px")
+	   .attr("r", function(d, i){
+	   		  return i * 5 + 5 + "px";
+			});
+
+
+d3.select(".chart")
+  .selectAll("div")
+    .data(rapperArray)
+  .enter().append("div")
+    .style("width", function(d){ return d.mYear / 100 + "px"; })
+	.style("background-color", function(d){ if(d.mYear > 2000){ return "red"; } else return "steelblue"; })
+	.text(function(d){ return d.mYear; });
+</script>
+</body>

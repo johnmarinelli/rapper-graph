@@ -36,7 +36,8 @@
   </div>
 <script>
 function getElementsFromString(list, delim){
-  return list.split(delim);
+  var elems = list.replace(/, /g, ',').split(delim);
+  return elems;
 }
 
 function Rapper(name, year){
@@ -104,7 +105,40 @@ var rapperArray = [];
 
 <script src="http://code.jquery.com/jquery-2.1.1.min.js"></script>
 <script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
+<script>
+function getRapperFromName(name){
+  var rapper = null;
 
+  for(var r in rapperArray){
+    if(name === rapperArray[r].mName){
+	  rapper = rapperArray[r];
+	}
+  }
+
+  return rapper;
+}
+
+function drawLines(x1, y1, x2, y2, color='blue'){
+  var lineData = [ [x1, y1],
+ 				   [x2, y2] ];
+
+  var lineFunction = d3.svg.line()
+						   .x(function(d){
+						   	    return d[0];
+						     })
+						   .y(function(d){
+						 	    return d[1];
+						     })
+						   .interpolate("linear");
+
+  var lines = svg.append("path")
+			     .attr("d", lineFunction(lineData))
+			     .attr("stroke", color)
+			     .attr("stroke-width", 2)
+			     .attr("fill", "none");
+  return lines;
+}
+</script>
 <script>
 var maxAvatarRadius =  25;
 var width = 500;
@@ -123,7 +157,8 @@ var circles = svg.selectAll("circle")
 var xDomain = getExtremes(rapperArray, 'mYear');
 var xScale = d3.scale.linear()
 					 .domain([xDomain[0], xDomain[1]])
-					 .range([maxAvatarRadius, width - maxAvatarRadius]);var xAxis = d3.svg.axis()
+					 .range([maxAvatarRadius, width - maxAvatarRadius]);
+var xAxis = d3.svg.axis()
 				  .scale(xScale)
 				  .orient("bottom")
 				  .ticks(5);
@@ -160,26 +195,21 @@ circles.attr("cx", function(d, i){
 	   		  return rScale(d.mPresence);
 	   		}); 
 
-var lineData = [ [rapperArray[0].mCoords.x, rapperArray[0].mCoords.y],
-				 [rapperArray[3].mCoords.x, rapperArray[3].mCoords.y] ];
-
-var lineFunction = d3.svg.line()
-						 .x(function(d){
-						 	  return d[0];
-						   })
-						 .y(function(d){
-						 	  return d[1];
-						   })
-						 .interpolate("linear");
-var lines = svg.append("path")
-			   .attr("d", lineFunction(lineData))
-			   .attr("stroke", "blue")
-			   .attr("stroke-width", 2)
-			   .attr("fill", "none");
-
 //many-to-many relationship lines
 for(var i in rapperArray){
-  
+  var rapper = rapperArray[i];
+  for(var b in rapper.mBeef){
+    var beef = getRapperFromName(rapper.mBeef[b]);
+    drawLines(rapper.mCoords.x, rapper.mCoords.y, beef.mCoords.x, beef.mCoords.y, 'red');
+  }
+  for(var inf in rapper.mInfluenced){
+    var influenced = getRapperFromName(rapper.mInfluenced[inf]);
+    drawLines(rapper.mCoords.x, rapper.mCoords.y, influenced.mCoords.x, influenced.mCoords.y, 'green');
+  }
+  for(var col in rapper.mCollaborated){
+    var collab  = getRapperFromName(rapper.mCollaborated[col]);
+    drawLines(rapper.mCoords.x, rapper.mCoords.y, collab.mCoords.x, collab.mCoords.y, 'blue');
+  }
 }
 </script>
 </body>

@@ -1,6 +1,20 @@
 <head>
 
 <style>
+body{
+  text-align: center;
+  width: 80vw;
+  margin: 0 auto;
+}
+
+svg{
+  float: left;
+}
+
+#rapper-info{
+  float:right;
+}
+
 .chart div{
   font: 10px sans-serif;
   background-color: steelblue;
@@ -34,6 +48,11 @@
 
   <div class="chart">
   </div>
+
+  <div id="rapper-info">
+    <h2 name="rapper-name">Name</h2>
+  </div>
+
 <script>
 <% @rappers.each do |rapper| %>
   var r = JSON.parse('<%= j(rapper.to_json).html_safe %>');
@@ -69,16 +88,27 @@
 <script src="http://code.jquery.com/jquery-2.1.1.min.js"></script>
 <script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
 <script>
+function setOriginalColors(){
+  d3.selectAll("path.path").each(function(){
+    this.originalColor = d3.select(this).attr("stroke");
+  });
+  d3.selectAll("marker.marker").each(function(){
+    this.originalColor = d3.select(this).attr("fill");
+  });
+  d3.selectAll("circle.rapper").each(function(){
+    this.originalColor = d3.select(this).attr("fill");
+  });
+}
+
 /*
 * takes in an object with x, y, radius member variables
 */
 function drawLines(coords1, coords2, color='blue'){
   var end = getClosestPoint(coords1, coords2);
   var start = getClosestPoint(coords2, coords1);
-console.log(coords1.x + ', ' + coords1.y + '-----' + coords2.x + ', ' + coords2.y);
-console.log(start.x + ', ' + start.y + '-----' + end.x + ', ' + end.y);
-
+  var mid = { x: randomInt(start.x, end.x), y: randomInt(start.y, start.y == end.y ? randomInt(end.y - maxAvatarRadius, end.y + maxAvatarRadius) : end.y) };
   var lineData = [ [start.x, start.y],
+  				   [mid.x, mid.y],
  				   [end.x, end.y] ];
 
   var lineFunction = d3.svg.line()
@@ -88,7 +118,7 @@ console.log(start.x + ', ' + start.y + '-----' + end.x + ', ' + end.y);
 						   .y(function(d){
 						 	    return d[1];
 						     })
-						   .interpolate("linear");
+						   .interpolate("basis");
 
   var lines = svg.append("path")
 			     .attr("d", lineFunction(lineData))
@@ -108,7 +138,7 @@ function drawMarkers(lines){
 					.attr("markerWidth", 6)
 					.attr("markerHeight", 4)
 					.attr("orient", "auto")
-					.attr("fill", lines.attr("stroke"))
+					.attr("fill", lines[0].attr("stroke"))
 					.attr("class", "marker")
 					.append("path")
 					  .attr("d", "M 0, 0 V 4 L6, 2 Z");
@@ -118,10 +148,6 @@ function drawMarkers(lines){
 
 </script>
 <script>
-var maxAvatarRadius =  25;
-var width = 500;
-var height = 500;
-
 var svg = d3.select("body")
 			.append("svg")
 			.attr("width", width + "px")
@@ -183,51 +209,65 @@ for(var i in rapperArray){
   var rapper = rapperArray[i];
   for(var b in rapper.mBeef){
     var beef = getRapperFromName(rapper.mBeef[b]);
-	rapper.mPaths.beef = drawLines(rapper.mCoords, beef.mCoords, 'red');
+	rapper.mPaths.beef.push(drawLines(rapper.mCoords, beef.mCoords, "red"));
     drawMarkers(rapper.mPaths.beef);
-  }
+  } 
   for(var inf in rapper.mInfluenced){
     var influenced = getRapperFromName(rapper.mInfluenced[inf]);
-    //drawLines(rapper.mCoords.x, rapper.mCoords.y, influenced.mCoords.x, influenced.mCoords.y, 'green');
+    rapper.mPaths.influenced.push(drawLines(rapper.mCoords, influenced.mCoords, "green"));
+	drawMarkers(rapper.mPaths.influenced);
   }
   for(var col in rapper.mCollaborated){
     var collab  = getRapperFromName(rapper.mCollaborated[col]);
-    //drawLines(rapper.mCoords.x, rapper.mCoords.y, collab.mCoords.x, collab.mCoords.y, 'blue');
-  }
+    rapper.mPaths.collaborated.push(drawLines(rapper.mCoords, collab.mCoords, "blue"));
+	drawMarkers(rapper.mPaths.collaborated);
+  } 
 }
 
-function setOriginalColors(){
-
-}
+setOriginalColors();
 
 $(".rapper").hover(
   function(){
 	var rapper = getRapperFromName($(this).attr("id"));
 	if(rapper != undefined){
-	  d3.selectAll("path.path").each(function(){
-	    this.originalColor = d3.select(this).attr("stroke");
-	  });
-	  d3.selectAll("marker.marker").each(function(){
-	    this.originalColor = d3.select(this).attr("fill");
-	  });
-	  d3.selectAll("circle.rapper").each(function(){
-	    this.originalColor = d3.select(this).attr("fill");
-	  });
+	  //remove all lines
+      d3.selectAll("path.path").attr("stroke", "transparent");
+      d3.selectAll("marker.marker").attr("fill", "transparent");
+	  d3.selectAll("circle.rapper").attr("fill", "gray");
 
-      d3.selectAll("path.path").attr("stroke", "gray");
 	  $(this).attr("fill", "orange");
-	  rapper.mPaths.beef.attr("stroke", "orange");
+
+	  //keep the lines relative to the rapper highlighted
+	  d3.selectAll(rapper.mPaths.beef).each(function(){
+	    this.attr("stroke", beefPathColor);
+	  });
+	  d3.selectAll(rapper.mPaths.influenced).each(function(){
+	    this.attr("stroke", influencedPathColor);
+      });
+	  d3.selectAll(rapper.mPaths.collaborated).each(function(){
+	    this.attr("stroke", collabPathColor);
+      });
+
+	  $("#rapper-info").find("h2[name='rapper-name']").after("<p>"+rapper.mName+"</p>");
 	}
   }, 
   function(){
 	var rapper = getRapperFromName($(this).attr("id"));
 	if(rapper != undefined){
+	  //set lines back to original colors
 	  d3.selectAll("path.path").each(function(){
 	    d3.select(this).attr("stroke", this.originalColor);
 	  });
+	  d3.selectAll("marker.marker").each(function(){
+	  	d3.select(this).attr("fill", this.originalColor);
+	  });
+	  d3.selectAll("circle.rapper").each(function(){
+	  	d3.select(this).attr("fill", this.originalColor);
+	  });
 
 	  $(this).attr("fill", "initial");
-	  rapper.mPaths.beef.attr("stroke", "red");
+
+	  $("#rapper-info").find("p").remove();
 	}
   }
 );

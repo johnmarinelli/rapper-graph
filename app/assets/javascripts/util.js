@@ -1,6 +1,9 @@
+var maxAvatarRadius = 25;
+var width = 500;
+var height = 500;
 var beefPathColor = "red";
 var influencedPathColor = "green";
-var collaboratedPathColor = "blue";
+var collabPathColor = "blue";
 
 function Rapper(name, year){
   this.mName = name;
@@ -87,3 +90,4 @@ function getElementsFromString(list, delim){
   var elems = list.replace(/, /g, ',').split(delim);
   return elems;
 }
+

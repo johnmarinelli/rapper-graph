@@ -1,6 +1,6 @@
-var maxAvatarRadius = 25;
-var width = 500;
-var height = 500;
+var maxAvatarRadius = 90;
+var width = window.innerWidth - (window.innerWidth / 10);
+var height = window.innerHeight;
 var beefPathColor = "red";
 var influencedPathColor = "green";
 var collabPathColor = "blue";

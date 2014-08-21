@@ -11,7 +11,9 @@ function Rapper(name, year){
   this.mBeef = [];
   this.mInfluenced = [];
   this.mCollaborated = [];
-  
+
+  this.mImagePath = "";
+
   this.mPresence = 0;
 
   this.mCoords = { x: 0, y: 0, radius: 0 };

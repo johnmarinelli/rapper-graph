@@ -32,7 +32,7 @@
   }
 
   rapper.setPresence();
-
+  rapper.mImagePath = r.image_path || "assets/default.png";
   rapperArray.push(rapper);
 <% end %>
 </script>
@@ -98,11 +98,12 @@ function drawMarkers(lines){
   $(".path").css("marker-end", "url(#arrowhead");
 }
 
-function insertPicture(circle){
-  var radius = circle.mCoords.radius;
+function insertPicture(rapper, circle){
+  var radius = rapper.mCoords.radius;
+  var svgID = "image_" + rapper.mName.replace(/ /g, '');
 
   svg.append("defs").append("pattern")
-  					.attr("id", "image")
+  					.attr("id", svgID)
 					.attr("patternUnits", "ObjectBoundingBox")
 					.attr("height", "100%")
 					.attr("width", "100%")
@@ -114,9 +115,9 @@ function insertPicture(circle){
 					  .attr("height", 1)
 					  .attr("width", 1)
 					  .attr("preserveAspectRatio", "xMidYMid slice")
-					  .attr("xlink:href", "assets/biggie.jpg");
+					  .attr("xlink:href", rapper.mImagePath);
 
-  d3.selectAll("circle").attr("fill", "url(#image)");
+  circle.attr("fill", "url(#"+svgID+")");
 }
 
 </script>
@@ -173,7 +174,7 @@ circles.attr("cx", function(d, i){
 	   		  return d.mCoords.radius;
 	   		})
 	   .attr("id", function(d){
-	   		  insertPicture(d);
+	   		  insertPicture(d, d3.select(this));  //move this line
 	   		  return d.mName;
 			})
 	   .attr("class", "rapper");
@@ -183,18 +184,25 @@ for(var i in rapperArray){
   var rapper = rapperArray[i];
   for(var b in rapper.mBeef){
     var beef = getRapperFromName(rapper.mBeef[b]);
-	rapper.mPaths.beef.push(drawLines(rapper.mCoords, beef.mCoords, "red"));
-    drawMarkers(rapper.mPaths.beef);
+	if(beef){
+  	  rapper.mPaths.beef.push(drawLines(rapper.mCoords, beef.mCoords, "red"));
+	
+      drawMarkers(rapper.mPaths.beef);
+	}
   } 
   for(var inf in rapper.mInfluenced){
     var influenced = getRapperFromName(rapper.mInfluenced[inf]);
-    rapper.mPaths.influenced.push(drawLines(rapper.mCoords, influenced.mCoords, "green"));
-	drawMarkers(rapper.mPaths.influenced);
+	if(influenced){
+      rapper.mPaths.influenced.push(drawLines(rapper.mCoords, influenced.mCoords, "green"));
+	  drawMarkers(rapper.mPaths.influenced);
+	}
   }
   for(var col in rapper.mCollaborated){
     var collab  = getRapperFromName(rapper.mCollaborated[col]);
-    rapper.mPaths.collaborated.push(drawLines(rapper.mCoords, collab.mCoords, "blue"));
-	drawMarkers(rapper.mPaths.collaborated);
+	if(collab){
+      rapper.mPaths.collaborated.push(drawLines(rapper.mCoords, collab.mCoords, "blue"));
+	  drawMarkers(rapper.mPaths.collaborated);
+	}
   } 
 }
 
@@ -207,9 +215,6 @@ $(".rapper").hover(
 	  //remove all lines
       d3.selectAll("path.path").attr("stroke", "transparent");
       d3.selectAll("marker.marker").attr("fill", "transparent");
-	  d3.selectAll("circle.rapper").attr("fill", "gray");
-
-	  $(this).attr("fill", "orange");
 
 	  //keep the lines relative to the rapper highlighted
 	  d3.selectAll(rapper.mPaths.beef).each(function(){
@@ -238,8 +243,6 @@ $(".rapper").hover(
 	  d3.selectAll("circle.rapper").each(function(){
 	  	d3.select(this).attr("fill", this.originalColor);
 	  });
-
-	  $(this).attr("fill", "initial");
 
 	  $("#rapper-info").find("h2[name='rapper-name']").html("Name");
 	}

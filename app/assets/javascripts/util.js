@@ -5,6 +5,8 @@ var beefPathColor = "red";
 var influencedPathColor = "green";
 var collabPathColor = "blue";
 
+var presenceSections = [];
+
 function Rapper(name, year){
   this.mName = name;
   this.mYear = year;
@@ -61,7 +63,7 @@ function randomInt(min, max){
 * in: rapper member variable
 * out: [min, max]
 */
-function getExtremes(property=0){
+function getRapperArrayExtremes(property=0){
   var min = Number.MAX_VALUE;
   var max = 0;
 

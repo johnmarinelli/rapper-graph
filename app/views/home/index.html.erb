@@ -32,6 +32,7 @@
   }
 
   rapper.setPresence();
+
   rapper.mImagePath = r.image_path || "assets/default.png";
   rapperArray.push(rapper);
 <% end %>
@@ -40,6 +41,27 @@
 <script src="http://code.jquery.com/jquery-2.1.1.min.js"></script>
 <script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
 <script>
+
+var presenceSectionCount = getRapperArrayExtremes('mPresence')[1] - getRapperArrayExtremes('mPresence')[0];
+var presenceSectionYIncrement = height / presenceSectionCount;
+presenceSections.push([0, presenceSectionYIncrement]);
+
+for(var i = 0; i < presenceSectionCount-1; i++){
+  var lastUpperBound = presenceSections[i][1];
+  presenceSections.push([lastUpperBound, lastUpperBound+presenceSectionYIncrement]);
+}
+
+function getPresenceSection(yCoord){
+  var presenceSection = [0, presenceSectionYIncrement];
+  for(var i in presenceSections){
+	if(yCoord >= presenceSection[i][0] && yCoord <= presenceSection[i][1]){
+	  presenceSection = presenceSections[i];
+	}
+  }
+
+  return presenceSection;
+}
+ 
 function setOriginalColors(){
   d3.selectAll("path.path").each(function(){
     this.originalColor = d3.select(this).attr("stroke");
@@ -132,7 +154,7 @@ var circles = svg.selectAll("circle")
 			     .enter()
    			     .append("circle");
   
-var xDomain = getExtremes('mYear');
+var xDomain = getRapperArrayExtremes('mYear');
 var xScale = d3.scale.linear()
 					 .domain([xDomain[0], xDomain[1]])
 					 .range([maxAvatarRadius, width - maxAvatarRadius]);
@@ -145,12 +167,12 @@ svg.append("g")
    .attr("transform", "translate(0," + (height - maxAvatarRadius) + ")")
    .call(xAxis);
 
-var yDomain = getExtremes('mPresence');
+var yDomain = getRapperArrayExtremes('mPresence');
 var yScale = d3.scale.linear()
 					 .domain([yDomain[0], yDomain[1]])
 					 .range([maxAvatarRadius, height - maxAvatarRadius]);
 
-var rDomain = getExtremes('mPresence');
+var rDomain = getRapperArrayExtremes('mPresence');
 var rScale = d3.scale.linear()
 					 .domain([rDomain[0], rDomain[1]])
 					 .range([maxAvatarRadius * .25, maxAvatarRadius]);
@@ -166,8 +188,11 @@ circles.attr("cx", function(d, i){
 			  return d.mCoords.x;
 			})
 	   .attr("cy", function(d, i){
-	   		  d.mCoords.y = yScale(d.mPresence);
-	   		  return d.mCoords.y;
+	   		  var flatPresenceCoord = yScale(d.mPresence);
+			  d.mCoords.y = flatPresenceCoord;
+			  var presenceSection = getPresenceSection(flatPresenceCoord.y);
+			  d.mCoords.y = randomInt(presenceSection[0], presenceSection[1]);
+	   		  return flatPresenceCoord;
 			})
 	   .attr("r", function(d, i){
 	   		  d.mCoords.radius = rScale(d.mPresence);

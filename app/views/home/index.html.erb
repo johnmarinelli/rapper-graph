@@ -33,7 +33,7 @@
 
   rapper.setPresence();
 
-  rapper.mImagePath = r.image_path || "assets/default.png";
+  rapper.mImagePath = r.image_path || defaultImagePath;
   rapperArray.push(rapper);
 <% end %>
 </script>
@@ -53,8 +53,9 @@ for(var i = 0; i < presenceSectionCount-1; i++){
 
 function getPresenceSection(yCoord){
   var presenceSection = [0, presenceSectionYIncrement];
+  console.log(yCoord);
   for(var i in presenceSections){
-	if(yCoord >= presenceSection[i][0] && yCoord <= presenceSection[i][1]){
+	if(yCoord >= presenceSections[i][0] && yCoord <= presenceSections[i][1]){
 	  presenceSection = presenceSections[i];
 	}
   }
@@ -189,10 +190,11 @@ circles.attr("cx", function(d, i){
 			})
 	   .attr("cy", function(d, i){
 	   		  var flatPresenceCoord = yScale(d.mPresence);
-			  d.mCoords.y = flatPresenceCoord;
-			  var presenceSection = getPresenceSection(flatPresenceCoord.y);
+//			  d.mCoords.y = flatPresenceCoord;
+			  var presenceSection = getPresenceSection(flatPresenceCoord);
+			  console.log(presenceSection);
 			  d.mCoords.y = randomInt(presenceSection[0], presenceSection[1]);
-	   		  return flatPresenceCoord;
+			  return d.mCoords.y;
 			})
 	   .attr("r", function(d, i){
 	   		  d.mCoords.radius = rScale(d.mPresence);

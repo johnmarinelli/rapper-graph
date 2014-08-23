@@ -4,6 +4,7 @@ var height = window.innerHeight;
 var beefPathColor = "red";
 var influencedPathColor = "green";
 var collabPathColor = "blue";
+var defaultImagePath = "assets/default.png";
 
 var presenceSections = [];
 

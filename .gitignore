@@ -15,6 +15,7 @@
 # Ignore all logfiles and tempfiles.
 /log/*.log
 /tmp
+/assets/images
 
 =======
 >>>>>>> 086b6cb496ca70985939c0920e9e45cd20a17cb1

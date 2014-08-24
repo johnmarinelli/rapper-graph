@@ -5,6 +5,17 @@ body{
   margin: 0 auto;
 }
 
+#legend hr{
+  width: 5%;
+  margin: 0;
+  border-width: 2px;
+  display: inline-block;
+}
+
+#legend p{
+  display: inline;
+}
+
 svg{
   float: left;
   margin: 0;

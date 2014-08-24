@@ -1,6 +1,12 @@
 <head>
 </head>
 <body>
+  <div id="legend">
+    <h2>Legend</h2>
+    <p>Beef <hr style="color: red"/></p><br/>
+	<p>Influenced <hr style="color: green"/></p><br/>
+	<p>Collaboration <hr style="color: blue"/></p><br/>
+  </div>
   <div id="rapper-info">
     <h2 name="rapper-name">Name</h2>
 	<p name="rapper-desc"></p>
@@ -162,7 +168,8 @@ var xScale = d3.scale.linear()
 var xAxis = d3.svg.axis()
 				  .scale(xScale)
 				  .orient("bottom")
-				  .ticks(5);
+				  .ticks(5)
+				  .tickFormat(d3.format(""));
 svg.append("g")
    .attr("class", "axis")
    .attr("transform", "translate(0," + (height - maxAvatarRadius) + ")")
